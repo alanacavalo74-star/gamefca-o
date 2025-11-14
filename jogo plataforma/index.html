@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogo Educação Financeira</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(to bottom, #282828, #3b3b3b);
+      color: #fff;
+      text-align: center;
+    }
+
+    .hidden { display: none; }
+
+    #menu {
+      margin-top: 80px;
+    }
+
+    #colorChoices, #coinChoices, #playerChoices {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .colorBox, .coinOption, .playerBox {
+      width: 60px;
+      height: 60px;
+      border: 3px solid #fff;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .colorBox:hover, .coinOption:hover, .playerBox:hover {
+      transform: scale(1.1);
+    }
+
+    .playerBox {
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      position: relative;
+    }
+
+    .playerBox.selected, .coinOption.selected {
+      border-color: #9b59b6;
+      border-width: 4px;
+      transform: scale(1.15);
+    }
+
+    canvas {
+      display: block;
+      margin: 20px auto;
+      background: #1f1f1f;
+      border: 4px solid #5c4033;
+      border-radius: 12px;
+    }
+
+    #hud {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 30px;
+      background: rgba(0,0,0,0.6);
+      border-bottom: 2px solid #5c4033;
+    }
+
+    button {
+      background: #9b59b6;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #8e44ad;
+    }
+
+    #colorStore {
+      background: #2d2d2d;
+      border: 3px solid #8e44ad;
+      padding: 20px;
+      width: 400px;
+      margin: 20px auto;
+      border-radius: 12px;
+    }
+
+    #storeColors {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    #questionBox {
+      background: #2d2d2d;
+      border: 3px solid #5c4033;
+      padding: 20px;
+      width: 400px;
+      margin: 20px auto;
+      border-radius: 12px;
+    }
+    #options button {
+      margin: 6px;
+    }
+
+    .coinOption[data-skin="normal"] {
+      background: radial-gradient(circle, #ffd166 0%, #f4a261 100%);
+    }
+    .coinOption[data-skin="pizza"] {
+      background-image: url('pizza.png');
+      background-size: cover;
+    }
+    .coinOption[data-skin="bloxy"] {
+      background-image: url('bloxy.png');
+      background-size: cover;
+    }
+  </style>
+</head>
+<body>
+  <div id="menu">
+    <h1>💸 Jogo Educação Financeira</h1>
+    <h2>🎮 Escolha seu personagem:</h2>
+    <div id="playerChoices"></div>
+    <h2>🎨 Escolha a cor do personagem:</h2>
+    <div id="colorChoices"></div>
+    <h2>💰 Escolha o tipo de moeda:</h2>
+    <div id="coinChoices">
+      <div class="coinOption selected" data-skin="normal">🔵 Normal</div>
+      <div class="coinOption" data-skin="pizza">🍕 Pizza</div>
+      <div class="coinOption" data-skin="bloxy">🥫 Bloxy</div>
+    </div>
+    <button id="startGameBtn">Iniciar Jogo</button>
+  </div>
+
+  <div id="hud" class="hidden">
+    <span id="scoreDisplay">Pontos: 0</span>
+    <span id="levelDisplay">Fase: 1</span>
+    <button id="openMenuBtn">☰</button>
+  </div>
+
+  <canvas id="gameCanvas" width="600" height="600" class="hidden"></canvas>
+  <div id="colorStore" class="hidden">
+    <h2>🎨 Loja de Cores</h2>
+    <div id="storeColors"></div>
+    <button id="closeStoreBtn">Fechar Loja</button>
+  </div>
+
+  <div id="questionBox" class="hidden">
+    <h2 id="questionText"></h2>
+    <div id="options"></div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const startGameBtn = document.getElementById('startGameBtn');
+    const colorChoices = document.getElementById('colorChoices');
+    const playerChoicesDiv = document.getElementById('playerChoices');
+    const questionBox = document.getElementById('questionBox');
+    const questionText = document.getElementById('questionText');
+    const optionsDiv = document.getElementById('options');
+    const hud = document.getElementById('hud');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const levelDisplay = document.getElementById('levelDisplay');
+    const coinChoices = document.getElementById('coinChoices');
+    const menu = document.getElementById('menu');
+
+    let player = { x: 280, y: 500, width: 40, height: 40, color: '#9c88ff', jumping: false, velocityY: 0, skinImage: null, usingSkin: false };
+    let gravity = 0.6, score = 0, level = 1;
+    let platforms = [], balls = [], keys = {}, animation;
+    let coinSkin = 'normal';
+
+    const playerSkins = [];
+    for (let i = 1; i <= 8; i++) {
+      const img = new Image();
+      img.src = `players/player${i}.png`;
+      playerSkins.push(img);
+    }
+
+    const initialColors = [{color: '#9c88ff'}, {color: '#e17055'}];
+
+    const questions = [
+      {q: "O que é um orçamento pessoal?", options: ["Um imposto", "Um planejamento financeiro", "Um tipo de investimento", "Um desconto", "Uma despesa"], correct: 1},
+      {q: "Qual é a principal vantagem de poupar dinheiro todo mês?", options: ["Evitar pagar contas", "Ter segurança financeira e alcançar objetivos", "Gastar mais no futuro", "Aumentar as dívidas", "Ganhar juros compostos"], correct: 1},
+      {q: "O que acontece se você não pagar a fatura do cartão de crédito até o vencimento?", options: ["Nada acontece", "O banco perdoa a dívida", "Você paga juros e multa", "O limite aumenta", "Você ganha pontos extras"], correct: 2},
+      {q: "O que significa investir dinheiro?", options: ["Guardar o dinheiro em casa", "Usar o dinheiro para gerar mais dinheiro", "Pagar dívidas", "Fazer compras parceladas", "Evitar gastar"], correct: 1},
+      {q: "O que é uma despesa fixa?", options: ["Conta que muda todo mês", "Gasto inesperado", "Conta que se repete com valor semelhante", "Compra parcelada", "Imposto de renda"], correct: 2},
+      {q: "O que significa viver dentro do orçamento?", options: ["Gastar mais do que ganha", "Gastar menos ou igual ao que ganha", "Guardar todo o dinheiro", "Não fazer anotações", "Evitar trabalhar"], correct: 1},
+      {q: "Por que é importante ter uma reserva de emergência?", options: ["Para gastar em promoções", "Para pagar viagens", "Para imprevistos como desemprego ou doença", "Para emprestar aos amigos", "Para comprar um carro"], correct: 2},
+      {q: "Qual destes é um investimento de renda fixa?", options: ["Ações", "Criptomoedas", "Tesouro Direto", "Compra de imóveis", "Fundos imobiliários"], correct: 2},
+      {q: "O que são juros compostos?", options: ["Juros cobrados uma vez só", "Juros sobre o valor inicial e sobre juros anteriores", "Juros apenas do cartão", "Juros negativos", "Taxas de desconto"], correct: 1},
+      {q: "Qual é o primeiro passo para melhorar a vida financeira?", options: ["Fazer mais dívidas", "Ignorar as contas", "Anotar e planejar gastos e ganhos", "Esperar ganhar mais dinheiro", "Gastar tudo antes do mês acabar"], correct: 2}
+    ];
+
+    playerSkins.forEach((img, index) => {
+      const box = document.createElement('div');
+      box.className = 'playerBox';
+      if (index === 0) box.classList.add('selected');
+      box.style.backgroundImage = `url('players/player${index + 1}.png')`;
+      box.onclick = () => {
+        document.querySelectorAll('.playerBox').forEach(b => b.classList.remove('selected'));
+        box.classList.add('selected');
+        player.skinImage = img;
+        player.usingSkin = true;
+      };
+      playerChoicesDiv.appendChild(box);
+    });
+    player.skinImage = playerSkins[0];
+    player.usingSkin = true;
+
+    initialColors.forEach(c => {
+      const box = document.createElement('div');
+      box.className = 'colorBox';
+      box.style.background = c.color;
+      box.onclick = () => { player.color = c.color; player.usingSkin = false; };
+      colorChoices.appendChild(box);
+    });
+
+    document.querySelectorAll('.coinOption').forEach(opt => {
+      opt.onclick = () => {
+        document.querySelectorAll('.coinOption').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        coinSkin = opt.dataset.skin;
+      };
+    });
+
+    startGameBtn.onclick = () => {
+      menu.style.display = 'none';
+      canvas.classList.remove('hidden');
+      hud.classList.remove('hidden');
+      loadLevel(1);
+      loop();
+    };
+
+    document.addEventListener('keydown', e => {
+      keys[e.key] = true;
+      if (e.key === ' ' && !player.jumping) {
+        player.velocityY = -12;
+        player.jumping = true;
+      }
+    });
+    document.addEventListener('keyup', e => keys[e.key] = false);
+
+    const levels = [
+      {
+        platforms: [{x: 100, y: 550, width: 100, height: 10}, {x: 300, y: 450, width: 100, height: 10}, {x: 500, y: 350, width: 100, height: 10}],
+        balls: [{x: 120, y: 520, visible: true}, {x: 320, y: 420, visible: true}, {x: 520, y: 320, visible: true}]
+      }
+    ];
+    for (let i = 2; i <= 15; i++) {
+      levels.push({
+        platforms: Array.from({length: Math.min(4 + i, 10)}, (_, j) => ({x: 80 * j % 500 + 50, y: 550 - (j * 40), width: 80, height: 10})),
+        balls: Array.from({length: Math.min(3 + i, 10)}, (_, j) => ({x: 100 * j % 550 + 60, y: 500 - (j * 35), visible: true}))
+      });
+    }
+
+    const pizzaImg = new Image(); pizzaImg.src = 'pizza.png';
+    const bloxyImg = new Image(); bloxyImg.src = 'bloxy.png';
+
+    function loadLevel(lvl) {
+      const current = levels[lvl - 1];
+      platforms = current.platforms;
+      balls = current.balls.map(b => ({...b, radius: 10}));
+      player.x = 250;
+      player.y = 500;
+    }
+
+    function showQuestion() {
+      const q = questions[Math.floor(Math.random() * questions.length)];
+      questionText.textContent = q.q;
+      optionsDiv.innerHTML = '';
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.textContent = opt;
+        btn.onclick = () => {
+          if (i === q.correct) {
+            score += 10;
+            alert('✅ Correto!');
+          } else {
+            alert(`❌ Errado! A resposta certa é: ${q.options[q.correct]}`);
+          }
+          scoreDisplay.textContent = 'Pontos: ' + score;
+          questionBox.classList.add('hidden');
+          loop();
+        };
+        optionsDiv.appendChild(btn);
+      });
+      questionBox.classList.remove('hidden');
+      cancelAnimationFrame(animation);
+    }
+
+    function loop() {
+      animation = requestAnimationFrame(loop);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (keys['ArrowLeft']) player.x -= 4;
+      if (keys['ArrowRight']) player.x += 4;
+
+      // ⛔ Limite nas paredes
+      if (player.x < 0) player.x = 0;
+      if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+      player.velocityY += gravity;
+      player.y += player.velocityY;
+
+      if (player.y + player.height > canvas.height) {
+        player.y = canvas.height - player.height;
+        player.velocityY = 0;
+        player.jumping = false;
+      }
+
+      platforms.forEach(p => {
+        if (player.x < p.x + p.width && player.x + player.width > p.x &&
+          player.y + player.height > p.y && player.y + player.height < p.y + p.height + 10 &&
+          player.velocityY >= 0) {
+          player.y = p.y - player.height;
+          player.velocityY = 0;
+          player.jumping = false;
+        }
+      });
+
+      ctx.fillStyle = '#5c4033';
+      platforms.forEach(p => ctx.fillRect(p.x, p.y, p.width, p.height));
+
+      balls.forEach(ball => {
+        if (!ball.visible) return;
+        if (coinSkin === 'pizza') ctx.drawImage(pizzaImg, ball.x - 10, ball.y - 10, 20, 20);
+        else if (coinSkin === 'bloxy') ctx.drawImage(bloxyImg, ball.x - 10, ball.y - 10, 20, 20);
+        else { ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2); ctx.fillStyle = '#ffd166'; ctx.fill(); }
+
+        if (player.x < ball.x + ball.radius && player.x + player.width > ball.x - ball.radius &&
+          player.y < ball.y + ball.radius && player.y + player.height > ball.y - ball.radius) {
+          ball.visible = false;
+          showQuestion();
+        }
+      });
+
+      if (player.usingSkin && player.skinImage && player.skinImage.complete)
+        ctx.drawImage(player.skinImage, player.x, player.y, player.width, player.height);
+      else {
+        if (player.color.includes(',')) {
+          const colors = player.color.split(',');
+          const grad = ctx.createLinearGradient(player.x, player.y, player.x + player.width, player.y + player.height);
+          grad.addColorStop(0, colors[0]);
+          grad.addColorStop(1, colors[1]);
+          ctx.fillStyle = grad;
+        } else ctx.fillStyle = player.color;
+        ctx.fillRect(player.x, player.y, player.width, player.height);
+      }
+
+      if (balls.every(b => !b.visible)) nextLevel();
+    }
+
+    function nextLevel() {
+      cancelAnimationFrame(animation);
+      if (level < levels.length) {
+        alert(`🎉 Fase ${level} concluída!`);
+        level++;
+        levelDisplay.textContent = 'Fase: ' + level;
+        loadLevel(level);
+        loop();
+      } else {
+        alert(`🏆 Parabéns! Você terminou todas as 15 fases! Pontos: ${score}`);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pegue o Dinheiro!</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="menu">
+    <span id="score">Pontuação: 0</span>
+    <button id="shopBtn">💰 Loja</button>
+  </div>
+
+  <div id="game">
+    <div id="player"></div>
+  </div>
+
+  <!-- Modal Loja -->
+  <div id="shopModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>🏦 Loja de Investimentos</h2>
+      <p>Renda de Emergência: 50% extra por coleta</p>
+      <div class="modal-actions">
+        <button id="closeShop">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tela de Game Over -->
+  <div id="gameOver" class="overlay hidden">
+    <div class="overlay-content">
+      <h1>💥 GAME OVER 💥</h1>
+      <p id="finalScore"></p>
+      <button id="restartBtn">Jogar Novamente</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(to bottom, #282828, #3b3b3b);
+  color: #fff;
+  text-align: center;
+}
+
+.hidden { display: none; }
+
+#menu {
+  margin-top: 80px;
+}
+
+#colorChoices, #coinChoices {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.colorBox, .coinOption {
+  width: 60px;
+  height: 60px;
+  border: 3px solid #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.colorBox:hover, .coinOption:hover {
+  transform: scale(1.1);
+}
+
+canvas {
+  display: block;
+  margin: 20px auto;
+  background: #1f1f1f;
+  border: 4px solid #5c4033;
+  border-radius: 12px;
+}
+
+#hud {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 30px;
+  background: rgba(0,0,0,0.6);
+  border-bottom: 2px solid #5c4033;
+}
+
+button {
+  background: #9b59b6;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+}
+button:hover {
+  background: #8e44ad;
+}
+
+/* Loja */
+#colorStore {
+  background: #2d2d2d;
+  border: 3px solid #8e44ad;
+  padding: 20px;
+  width: 400px;
+  margin: 20px auto;
+  border-radius: 12px;
+}
+
+#storeColors {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.colorBox {
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
+  border: 2px solid white;
+}
+
+/* Perguntas */
+#questionBox {
+  background: #2d2d2d;
+  border: 3px solid #5c4033;
+  padding: 20px;
+  width: 400px;
+  margin: 20px auto;
+  border-radius: 12px;
+}
+#options button {
+  margin: 6px;
+}
+
+/* Moedas */
+.coinOption[data-skin="pizza"] {
+  background-image: url('pizza.png');
+  background-size: cover;
+}
+.coinOption[data-skin="bloxy"] {
+  background-image: url('bloxy.png');
+  background-size: cover;
+}

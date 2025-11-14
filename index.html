@@ -2,40 +2,71 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pegue o Dinheiro!</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Página Inicial - Jogos</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #1e1e1e, #333);
+      color: #990b7a98;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+      background: #7abbd4;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgb(0, 81, 255);
+      width: 90%;
+      max-width: 500px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 28px;
+    }
+
+    .button {
+      display: inline-block;
+      width: 45%;
+      padding: 15px;
+      margin: 10px;
+      background: #3a0a44;
+      border: none;
+      color: #fff;
+      font-size: 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .button:hover {
+      background: #985ce6;
+    }
+  </style>
 </head>
 <body>
-  <div id="menu">
-    <span id="score">Pontuação: 0</span>
-    <button id="shopBtn">💰 Loja</button>
-  </div>
+  <div class="container">
+    <h1>educação financeira</h1>
+    <p style="font-size:16px; margin-bottom:30px;">
+     A educação financeira é o conhecimento que ajuda as pessoas a usar o dinheiro de forma inteligente e equilibrada. Ela começa entendendo quanto se ganha, quanto se gasta e como organizar o orçamento mensal. Quando a pessoa aprende a controlar seus gastos, evita desperdícios e consegue planejar melhor suas necessidades e desejos.
 
-  <div id="game">
-    <div id="player"></div>
-  </div>
+Um dos pontos mais importantes é aprender a guardar uma parte da renda. Criar uma reserva financeira ajuda a enfrentar imprevistos sem precisar fazer dívidas ou recorrer ao crédito. Mesmo economizando pouco, o hábito de poupar faz muita diferença com o tempo.
 
-  <!-- Modal Loja -->
-  <div id="shopModal" class="modal hidden">
-    <div class="modal-content">
-      <h2>🏦 Loja de Investimentos</h2>
-      <p>Renda de Emergência: 50% extra por coleta</p>
-      <div class="modal-actions">
-        <button id="closeShop">Fechar</button>
-      </div>
-    </div>
-  </div>
+A educação financeira também envolve aprender sobre investimentos, que são formas de fazer o dinheiro crescer. Existem opções simples e seguras, que qualquer pessoa pode começar. Investir ajuda a realizar metas maiores, como comprar algo desejado, fazer uma viagem ou garantir um futuro mais confortável.
 
-  <!-- Tela de Game Over -->
-  <div id="gameOver" class="overlay hidden">
-    <div class="overlay-content">
-      <h1>💥 GAME OVER 💥</h1>
-      <p id="finalScore"></p>
-      <button id="restartBtn">Jogar Novamente</button>
-    </div>
-  </div>
+Além disso, compreender como funcionam juros, cartão de crédito e empréstimos evita problemas financeiros. Com conhecimento, a pessoa toma decisões melhores e evita cair em dívidas que podem virar uma bola de neve.
 
-  <script src="script.js"></script>
+No fim, educação financeira significa ter mais segurança, tranquilidade e liberdade para realizar sonhos de maneira responsável.
+    </p>
+
+    <button class="button" onclick="location.href='jogo esquiva/index.html'">Jogo 1 - esquiva</button>
+    <button class="button" onclick="location.href='jogo plataforma/index.html'">Jogo 2 - plataforma</button>
+  </div>
 </body>
 </html>
